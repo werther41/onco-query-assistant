@@ -2,6 +2,8 @@
 
 AI-powered genomic variant interpretation tool for oncologists, researchers, and students. Rapidly interpret genomic variants by querying the CIViC database and generating comprehensive clinical reports using Google Gemini AI.
 
+🌐 **Live Demo**: [https://onco-query-assistant.vercel.app/](https://onco-query-assistant.vercel.app/)
+
 ## Features
 
 - **Variant Input**: Enter gene names and variants manually (supports HGVS and CIViC formats)
@@ -31,8 +33,8 @@ AI-powered genomic variant interpretation tool for oncologists, researchers, and
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd oncoQuery
+git clone https://github.com/werther41/onco-query-assistant.git
+cd onco-query-assistant
 ```
 
 2. Install dependencies:
