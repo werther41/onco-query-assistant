@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { Plus, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export interface Variant {
   gene: string;
@@ -32,86 +33,109 @@ export default function VariantInput({ variants, onChange }: VariantInputProps) 
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {variants.map((variant, index) => (
         <div
           key={index}
-          className="border border-gray-300 rounded-lg p-4 bg-white"
+          className="border border-border rounded-lg p-4 bg-card"
         >
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="text-sm font-semibold text-gray-700">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-sm font-semibold text-foreground">
               Variant {index + 1}
             </h3>
             {variants.length > 1 && (
               <button
                 type="button"
                 onClick={() => removeVariant(index)}
-                className="text-red-600 hover:text-red-800"
+                className="text-destructive hover:text-destructive/80"
               >
                 <X className="w-4 h-4" />
               </button>
             )}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Gene Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
+
+          {/* Required fields - compact 3 column layout */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+            {/* Gene Name */}
+            <div className="space-y-1">
+              <Label htmlFor={`gene-${index}`} className="font-medium text-xs">
+                Gene Name <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id={`gene-${index}`}
+                placeholder="e.g., EGFR"
                 value={variant.gene}
                 onChange={(e) => updateVariant(index, "gene", e.target.value)}
-                placeholder="e.g., EGFR, MET, KRAS"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="h-8 text-base"
                 required
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Variant
-              </label>
-              <input
-                type="text"
+
+            {/* Variant */}
+            <div className="space-y-1">
+              <Label htmlFor={`variant-${index}`} className="text-xs font-medium">
+                Variant <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id={`variant-${index}`}
+                placeholder="e.g., T790M"
                 value={variant.variant}
                 onChange={(e) => updateVariant(index, "variant", e.target.value)}
-                placeholder="e.g., T790M, G12S, Exon 14 Skipping"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="h-8 text-sm"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Exon (Optional)
-              </label>
-              <input
-                type="text"
+
+            {/* Exon */}
+            <div className="space-y-1">
+              <Label
+                htmlFor={`exon-${index}`}
+                className="text-xs font-medium text-muted-foreground"
+              >
+                Exon
+              </Label>
+              <Input
+                id={`exon-${index}`}
+                placeholder="e.g., 14"
                 value={variant.exon || ""}
                 onChange={(e) => updateVariant(index, "exon", e.target.value)}
-                placeholder="e.g., 14, 19"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="h-8 text-sm"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Nucleotide Change (Optional)
-              </label>
-              <input
-                type="text"
+          </div>
+
+          {/* Optional fields - 2 column layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Nucleotide Change */}
+            <div className="space-y-1">
+              <Label
+                htmlFor={`nucleotide-${index}`}
+                className="text-xs font-medium text-muted-foreground"
+              >
+                Nucleotide Change
+              </Label>
+              <Input
+                id={`nucleotide-${index}`}
+                placeholder="e.g., c.1081C>T"
                 value={variant.nucleotideChange || ""}
                 onChange={(e) => updateVariant(index, "nucleotideChange", e.target.value)}
-                placeholder="e.g., c.1081C>T"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="h-8 text-sm"
               />
             </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Amino Acid Change (Optional)
-              </label>
-              <input
-                type="text"
+
+            {/* Amino Acid Change */}
+            <div className="space-y-1">
+              <Label
+                htmlFor={`amino-${index}`}
+                className="text-xs font-medium text-muted-foreground"
+              >
+                Amino Acid Change
+              </Label>
+              <Input
+                id={`amino-${index}`}
+                placeholder="e.g., p.Arg361Cys"
                 value={variant.aminoAcidChange || ""}
                 onChange={(e) => updateVariant(index, "aminoAcidChange", e.target.value)}
-                placeholder="e.g., p.Arg361Cys, p.Gly12Ser"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="h-8 text-sm"
               />
             </div>
           </div>
@@ -120,12 +144,10 @@ export default function VariantInput({ variants, onChange }: VariantInputProps) 
       <button
         type="button"
         onClick={addVariant}
-        className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium"
+        className="flex items-center gap-2 text-primary hover:text-primary/80 font-medium text-sm transition-colors"
       >
-        <Plus className="w-4 h-4" />
-        Add Another Variant
+        <span className="text-lg">+</span> Add Another Variant
       </button>
     </div>
   );
 }
-

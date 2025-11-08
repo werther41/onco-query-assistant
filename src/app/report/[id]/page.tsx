@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import ReportDisplay from "@/components/ReportDisplay";
 import ChatInterface from "@/components/ChatInterface";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ChevronLeft, Loader2, Share2, Download } from "lucide-react";
 
 interface ReportData {
   report: string;
@@ -50,10 +52,10 @@ export default function ReportPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading report...</p>
+          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading report...</p>
         </div>
       </div>
     );
@@ -61,43 +63,69 @@ export default function ReportPage() {
 
   if (error || !reportData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-4">
-          <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg mb-4">
+          <div className="bg-destructive/10 border border-destructive/20 text-destructive px-6 py-4 rounded-lg mb-4">
             {error || "Report not found"}
           </div>
-          <button
-            onClick={() => router.push("/")}
-            className="text-blue-600 hover:text-blue-800 font-medium"
-          >
-            ← Back to Home
-          </button>
+          <Link href="/">
+            <Button variant="ghost" className="gap-2">
+              <ChevronLeft className="w-4 h-4" />
+              Back to Home
+            </Button>
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-6 md:py-8">
-        <button
-          onClick={() => router.push("/")}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium mb-6"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Home
-        </button>
+    <main className="min-h-screen bg-gradient-to-br from-background to-secondary py-8 px-4">
+      <div className="max-w-6xl mx-auto">
+        {/* Top Navigation */}
+        <div className="flex items-center justify-between mb-8">
+          <Link href="/">
+            <Button variant="ghost" className="gap-2 text-muted-foreground">
+              <ChevronLeft className="w-4 h-4" />
+              Back to Home
+            </Button>
+          </Link>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 bg-transparent"
+            >
+              <Share2 className="w-4 h-4" />
+              <span className="hidden sm:inline">Share</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 bg-transparent"
+            >
+              <Download className="w-4 h-4" />
+              <span className="hidden sm:inline">Export</span>
+            </Button>
+          </div>
+        </div>
 
-        <div className="space-y-6">
-          <ReportDisplay
-            report={reportData.report}
-            variantInfo={reportData.variantInfo}
-          />
+        {/* Main Content and Sidebar */}
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Report Content */}
+          <div className="lg:col-span-2 space-y-6">
+            <ReportDisplay
+              report={reportData.report}
+              variantInfo={reportData.variantInfo}
+            />
+          </div>
 
-          <ChatInterface reportContext={reportData} />
+          {/* Sidebar - Chat Interface */}
+          <div>
+            <ChatInterface reportContext={reportData} />
+          </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
-
