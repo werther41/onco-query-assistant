@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Loader2, MessageSquare } from "lucide-react";
+import { Send, Loader2, MessageCircle } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import ReactMarkdown from "react-markdown";
 
 interface Message {
   role: "user" | "assistant";
@@ -70,7 +74,9 @@ export default function ChatInterface({ reportContext }: ChatInterfaceProps) {
     } catch (error: any) {
       const errorMessage: Message = {
         role: "assistant",
-        content: `Error: ${error.message || "Failed to get response. Please try again."}`,
+        content: `Error: ${
+          error.message || "Failed to get response. Please try again."
+        }`,
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
@@ -79,20 +85,20 @@ export default function ChatInterface({ reportContext }: ChatInterfaceProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
-      <div className="flex items-center gap-2 mb-4">
-        <MessageSquare className="w-5 h-5 text-blue-600" />
-        <h3 className="text-xl font-bold text-gray-900">Ask Questions</h3>
+    <Card className="p-6 shadow-md border-0 sticky top-8 gap-2">
+      <div className="flex items-center gap-1">
+        <MessageCircle className="w-5 h-5 text-primary" />
+        <h3 className="text-lg font-bold text-foreground">Ask Questions</h3>
       </div>
-      <p className="text-sm text-gray-600 mb-4">
-        Ask follow-up questions about the variant, treatment options, or request
-        clarification on any terms.
+      <p className="text-sm text-muted-foreground">
+        Ask follow-up questions about the variant, evidence, treatment options,
+        or request clarification.
       </p>
 
-      <div className="border border-gray-200 rounded-lg h-96 flex flex-col">
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="border border-border rounded-lg h-96 flex flex-col mb-1">
+        <div className="flex-1 overflow-y-auto p-2 space-y-2">
           {messages.length === 0 ? (
-            <div className="text-center text-gray-500 mt-8">
+            <div className="text-center text-muted-foreground mt-8">
               <p>Start a conversation by asking a question below.</p>
               <p className="text-sm mt-2">
                 Example: "What is a kinase inhibitor?" or "Explain the evidence
@@ -108,52 +114,90 @@ export default function ChatInterface({ reportContext }: ChatInterfaceProps) {
                 }`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                  className={`max-w-[96%] rounded-lg p-3 ${
                     message.role === "user"
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 text-gray-900"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary text-foreground"
                   }`}
                 >
-                  <p className="whitespace-pre-wrap">{message.content}</p>
+                  <p className="whitespace-pre-wrap text-sm">
+                    <ReactMarkdown
+                      components={{
+                        p: ({ children }) => (
+                          <p className="text-sm">{children}</p>
+                        ),
+                      }}
+                    >
+                      {message.content}
+                    </ReactMarkdown>
+                  </p>
                 </div>
               </div>
             ))
           )}
           {loading && (
             <div className="flex justify-start">
-              <div className="bg-gray-100 rounded-lg px-4 py-2">
-                <Loader2 className="w-5 h-5 animate-spin text-gray-600" />
+              <div className="bg-secondary rounded-lg px-4 py-2">
+                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
               </div>
             </div>
           )}
           <div ref={messagesEndRef} />
         </div>
 
-        <form onSubmit={handleSubmit} className="border-t border-gray-200 p-4">
+        <form onSubmit={handleSubmit} className="border-t border-border p-4">
           <div className="flex gap-2">
-            <input
+            <Input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask a question about the variant..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               disabled={loading}
+              className="flex-1"
             />
-            <button
+            <Button
               type="submit"
               disabled={loading || !input.trim()}
-              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              size="icon"
             >
               {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                <Send className="w-5 h-5" />
+                <Send className="w-4 h-4" />
               )}
-            </button>
+            </Button>
           </div>
         </form>
       </div>
-    </div>
+
+      {/* Additional Info Section */}
+      <div className="pt-3 border-border">
+        <h4 className="text-sm font-semibold text-foreground mb-3">
+          Additional Resources
+        </h4>
+        <ul className="space-y-2 text-sm">
+          <li>
+            <a
+              href="https://civicdb.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              CIViC Entry
+            </a>
+          </li>
+          <li>
+            <a href="#" className="text-primary hover:underline">
+              Related Literature
+            </a>
+          </li>
+          <li>
+            <a href="#" className="text-primary hover:underline">
+              Trial Information
+            </a>
+          </li>
+        </ul>
+      </div>
+    </Card>
   );
 }
-
