@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState, useCallback } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import ReportDisplay from "@/components/ReportDisplay";
@@ -9,7 +9,7 @@ import ChatInterface from "@/components/ChatInterface";
 import { ChevronLeft, Loader2, Share2, Download } from "lucide-react";
 
 interface ReportData {
-  report: string;
+  report: string | null;
   variantInfo: {
     gene: string;
     variant?: string;
@@ -17,15 +17,50 @@ interface ReportData {
     nucleotideChange?: string;
     aminoAcidChange?: string;
   };
-  civicData?: any;
+  civicData?: unknown;
+  civicMarkdown?: string;
 }
 
 export default function ReportPage() {
   const params = useParams();
-  const router = useRouter();
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const generateReport = useCallback(async (data: ReportData, reportId: string) => {
+    try {
+      const response = await fetch("/api/generate-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          civicMarkdown: data.civicMarkdown,
+          variantInfo: data.variantInfo,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to generate report");
+      }
+
+      const { report } = await response.json();
+      
+      // Update report data
+      const updatedData = {
+        ...data,
+        report,
+      };
+      
+      setReportData(updatedData);
+      
+      // Update sessionStorage
+      sessionStorage.setItem(`report-${reportId}`, JSON.stringify(updatedData));
+    } catch (err: unknown) {
+      console.error("Error generating report:", err);
+      const errorMessage = err instanceof Error ? err.message : "Failed to generate report";
+      setError(errorMessage);
+    }
+  }, []);
 
   useEffect(() => {
     const reportId = params.id as string;
@@ -41,14 +76,19 @@ export default function ReportPage() {
       try {
         const data = JSON.parse(stored);
         setReportData(data);
-      } catch (err) {
+        
+        // If report doesn't exist, generate it
+        if (!data.report && data.civicMarkdown && data.variantInfo) {
+          generateReport(data, reportId);
+        }
+      } catch {
         setError("Failed to load report data");
       }
     } else {
       setError("Report not found. Please generate a new report.");
     }
     setLoading(false);
-  }, [params.id]);
+  }, [params.id, generateReport]);
 
   if (loading) {
     return (
@@ -117,12 +157,21 @@ export default function ReportPage() {
             <ReportDisplay
               report={reportData.report}
               variantInfo={reportData.variantInfo}
+              civicMarkdown={reportData.civicMarkdown}
             />
           </div>
 
           {/* Sidebar - Chat Interface */}
           <div>
-            <ChatInterface reportContext={reportData} />
+            {reportData && (
+              <ChatInterface
+                reportContext={{
+                  variantInfo: reportData.variantInfo,
+                  report: reportData.report || "",
+                  civicMarkdown: reportData.civicMarkdown,
+                }}
+              />
+            )}
           </div>
         </div>
       </div>

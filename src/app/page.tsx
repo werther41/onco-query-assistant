@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronRight, Zap, Upload, Loader2 } from "lucide-react";
@@ -51,41 +50,26 @@ export default function HomePage() {
         throw new Error(errorData.error || "Failed to query CIViC database");
       }
 
-      const civicData = await civicResponse.json();
+      const { civicData, civicMarkdown } = await civicResponse.json();
 
-      // Step 2: Generate Report
-      const reportResponse = await fetch("/api/generate-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          civicData,
-          variantInfo: firstVariant,
-        }),
-      });
-
-      if (!reportResponse.ok) {
-        const errorData = await reportResponse.json();
-        throw new Error(errorData.error || "Failed to generate report");
-      }
-
-      const { report } = await reportResponse.json();
-
-      // Step 3: Navigate to report page with data
+      // Step 2: Navigate to report page immediately (before report generation)
       const reportId = Date.now().toString();
       const reportData = {
-        report,
         variantInfo: firstVariant,
         civicData,
+        civicMarkdown,
+        // Report will be generated on the report page
+        report: null,
       };
 
       // Store in sessionStorage for retrieval
       sessionStorage.setItem(`report-${reportId}`, JSON.stringify(reportData));
 
       router.push(`/report/${reportId}`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error:", err);
-      setError(err.message || "An unexpected error occurred");
-    } finally {
+      const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred";
+      setError(errorMessage);
       setLoading(false);
     }
   };
@@ -103,11 +87,15 @@ export default function HomePage() {
       variant: "Exon 14 Skipping",
       description: "MET Exon 14 Skipping",
     },
-    { gene: "KRAS", variant: "G12S (or p.Gly12Ser)", description: "KRAS G12S" },
+    {
+      gene: "KRAS",
+      variant: "p.Gly12Ser",
+      description: "KRAS G12S (or p.Gly12Ser)",
+    },
     {
       gene: "TP53",
-      variant: "R248W (or p.Arg248Trp)",
-      description: "TP53 R248W",
+      variant: "R248W",
+      description: "TP53 R248W (or p.Arg248Trp)",
     },
   ];
 

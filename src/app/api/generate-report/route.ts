@@ -5,11 +5,11 @@ import { VariantInfo } from "@/lib/civic/types";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { civicData, variantInfo } = body;
+    const { civicMarkdown, variantInfo } = body;
 
-    if (!civicData || !variantInfo) {
+    if (!civicMarkdown || !variantInfo) {
       return NextResponse.json(
-        { error: "Missing required data: civicData and variantInfo are required" },
+        { error: "Missing required data: civicMarkdown and variantInfo are required" },
         { status: 400 }
       );
     }
@@ -21,15 +21,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const report = await generateReport(civicData, variantInfo as VariantInfo);
+    const report = await generateReport(civicMarkdown, variantInfo as VariantInfo);
 
     return NextResponse.json({ report });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error generating report:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
       {
         error: "Failed to generate report",
-        details: error.message || "Unknown error",
+        details: errorMessage,
       },
       { status: 500 }
     );

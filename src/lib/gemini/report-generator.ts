@@ -6,11 +6,11 @@ import { VariantInfo } from "@/lib/civic/types";
  * Generates a clinical report using Gemini Pro
  */
 export async function generateReport(
-  civicData: any,
+  civicMarkdown: string,
   variantInfo: VariantInfo
 ): Promise<string> {
   try {
-    const prompt = buildReportPrompt(civicData, variantInfo);
+    const prompt = buildReportPrompt(civicMarkdown, variantInfo);
     const result = await geminiProModel.generateContent(prompt);
     const response = await result.response;
     return response.text();
@@ -29,7 +29,7 @@ export async function chatWithGemini(
   reportContext: {
     variantInfo: VariantInfo;
     report: string;
-    civicData?: any;
+    civicMarkdown?: string;
   }
 ): Promise<string> {
   try {

@@ -22,7 +22,7 @@ interface ChatInterfaceProps {
       aminoAcidChange?: string;
     };
     report: string;
-    civicData?: any;
+    civicMarkdown?: string;
   };
 }
 
@@ -71,12 +71,13 @@ export default function ChatInterface({ reportContext }: ChatInterfaceProps) {
         content: assistantResponse,
       };
       setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessageText = error instanceof Error 
+        ? error.message 
+        : "Failed to get response. Please try again.";
       const errorMessage: Message = {
         role: "assistant",
-        content: `Error: ${
-          error.message || "Failed to get response. Please try again."
-        }`,
+        content: `Error: ${errorMessageText}`,
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
@@ -101,8 +102,8 @@ export default function ChatInterface({ reportContext }: ChatInterfaceProps) {
             <div className="text-center text-muted-foreground mt-8">
               <p>Start a conversation by asking a question below.</p>
               <p className="text-sm mt-2">
-                Example: "What is a kinase inhibitor?" or "Explain the evidence
-                level A."
+                Example: &quot;What is a kinase inhibitor?&quot; or &quot;Explain the evidence
+                level A.&quot;
               </p>
             </div>
           ) : (
