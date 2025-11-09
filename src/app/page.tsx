@@ -103,11 +103,15 @@ export default function HomePage() {
       variant: "Exon 14 Skipping",
       description: "MET Exon 14 Skipping",
     },
-    { gene: "KRAS", variant: "G12S (or p.Gly12Ser)", description: "KRAS G12S" },
+    {
+      gene: "KRAS",
+      variant: "p.Gly12Ser",
+      description: "KRAS G12S (or p.Gly12Ser)",
+    },
     {
       gene: "TP53",
-      variant: "R248W (or p.Arg248Trp)",
-      description: "TP53 R248W",
+      variant: "R248W",
+      description: "TP53 R248W (or p.Arg248Trp)",
     },
   ];
 
