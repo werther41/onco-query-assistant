@@ -9,9 +9,9 @@ export const civicClient = new GraphQLClient(CIVIC_GRAPHQL_URL, {
   },
 });
 
-export async function queryCivic<T = any>(
+export async function queryCivic<T = unknown>(
   query: string,
-  variables?: any
+  variables?: Record<string, unknown>
 ): Promise<T> {
   try {
     const data = await civicClient.request<T>(query, variables);

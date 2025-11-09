@@ -28,17 +28,18 @@ export async function POST(request: NextRequest) {
       {
         variantInfo: reportContext.variantInfo as VariantInfo,
         report: reportContext.report,
-        civicData: reportContext.civicData,
+        civicMarkdown: reportContext.civicMarkdown,
       }
     );
 
     return NextResponse.json({ response });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error generating chat response:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
       {
         error: "Failed to generate chat response",
-        details: error.message || "Unknown error",
+        details: errorMessage,
       },
       { status: 500 }
     );
