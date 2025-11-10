@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -294,6 +295,16 @@ export default function HomePage() {
               </TabsContent>
             </Tabs>
           </Card>
+
+          {/* Link to infographic */}
+          <div className="mt-8 text-center">
+            <Link href="/infographic">
+              <Button variant="outline" className="text-base font-semibold">
+                View Genomic Interpretation Workflow Infographic
+                <ChevronRight className="ml-2 w-5 h-5" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </main>

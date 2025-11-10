@@ -53,7 +53,7 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.269 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: #009EE3;
+  --primary: #009ee3;
   --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
@@ -100,17 +100,4 @@
   .text-balance {
     text-wrap: balance;
   }
-}
-
-/* Custom markdown content styling */
-.markdown-content {
-  line-height: 1.7;
-}
-
-.markdown-content > *:first-child {
-  margin-top: 0;
-}
-
-.markdown-content > *:last-child {
-  margin-bottom: 0;
 }
