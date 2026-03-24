@@ -21,7 +21,7 @@ isProject: false
 
 ## Objective
 
-Migrate the existing Next.js app from Vercel + Gemini to a **single-node, production-style prototype** on Ubuntu using local vLLM (`nvidia/Nemotron-3-Super-120B-A12B-FP8`), Docker Compose, and Cloudflare Tunnel as the only external ingress.
+Migrate the existing Next.js app from Vercel + Gemini to a **single-node, production-style prototype** on Ubuntu using local vLLM (`nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-FP8`), Docker Compose, and Cloudflare Tunnel as the only external ingress.
 
 This V2 explicitly prioritizes:
 
@@ -68,7 +68,7 @@ flowchart LR
 ### Required env vars
 
 - `LOCAL_LLM_URL=http://vllm-backend:8000/v1`
-- `LOCAL_LLM_MODEL=nvidia/Nemotron-3-Super-120B-A12B-FP8`
+- `LOCAL_LLM_MODEL=nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-FP8` (gated: `HF_TOKEN`; vLLM: `--trust-remote-code`)
 - `LOCAL_LLM_API_KEY=local-no-key-required` (placeholder for SDK compatibility)
 
 ## Phase 2: Containerization and Runtime Hardening
