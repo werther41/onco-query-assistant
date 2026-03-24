@@ -5,8 +5,24 @@ Use this from an SSH session on the bare-metal host. Adjust service names and pa
 ## Prerequisites (one-time)
 
 - NVIDIA drivers and [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) installed.
-- Docker Engine and Docker Compose plugin.
+- Docker Engine **and** the Compose **plugin** (Ubuntu: `docker compose` must appear in `docker help`; install if missing):
+  ```bash
+  sudo apt update && sudo apt install -y docker-compose-plugin
+  docker compose version
+  ```
 - Hugging Face token available if the model requires gated download (set in `.env`, never commit it).
+
+If `docker compose up -d --build` fails with **`unknown shorthand flag: 'd' in -d`** and `docker help` does not list `compose`, the plugin is missing—install `docker-compose-plugin` as above, or use the legacy `docker-compose` (hyphen) CLI after `sudo apt install docker-compose`.
+
+If you see **`Cannot connect to the Docker daemon at unix:///var/run/docker.sock`**, the daemon is not running or your user cannot access the socket:
+
+```bash
+sudo systemctl start docker && sudo systemctl enable docker
+sudo systemctl status docker
+docker info
+```
+
+Add your user to the `docker` group if `docker info` fails without `sudo` (`sudo usermod -aG docker "$USER"`, then re-login). `docker compose version` can succeed even when the daemon is down; `docker compose up` requires a running daemon.
 
 ## 1. Deploy
 
@@ -32,6 +48,22 @@ docker compose logs -f vllm-backend
 # other terminal:
 docker compose logs -f nextjs-frontend
 ```
+
+If **`dependency failed to start: ... vllm-backend ... is unhealthy`** (or `enterprise-llm-node`):
+
+1. Inspect logs (the real error is almost always here):
+   ```bash
+   docker compose logs vllm-backend --tail 200
+   ```
+2. Confirm GPUs are visible **inside** the container (if this fails, fix NVIDIA Container Toolkit / GPU reservation in `docker-compose.yml`):
+   ```bash
+   docker compose run --rm --gpus all vllm-backend nvidia-smi
+   ```
+   If `docker compose run` does not accept `--gpus`, use:
+   ```bash
+   docker run --rm --gpus all vllm/vllm-openai:v0.8.5 nvidia-smi
+   ```
+3. Large models can take many minutes before `/v1/models` responds; `start_period` in Compose allows that. If the process **exits** (OOM, CUDA error, HF auth), the service will never become healthy—use the logs from step 1.
 
 ## 2. Validate GPU on the host
 

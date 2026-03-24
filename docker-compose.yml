@@ -5,12 +5,13 @@ services:
     restart: unless-stopped
     ipc: host
     shm_size: "16gb"
+    # GPU reservation (required for vLLM). Use count: all on a multi-GPU host; set device_ids to pin specific GPUs.
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              count: 2
+              count: all
               capabilities: [gpu]
     volumes:
       - hf_cache:/root/.cache/huggingface
@@ -28,10 +29,11 @@ services:
     networks:
       - saas_internal_network
     healthcheck:
+      # Prefer curl; vLLM images usually include it. If health always fails, check: docker compose logs vllm-backend
       test:
         [
           "CMD-SHELL",
-          "curl -fsS http://127.0.0.1:8000/v1/models >/dev/null || exit 1",
+          "curl -fsS http://127.0.0.1:8000/v1/models >/dev/null || python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/v1/models')\"",
         ]
       interval: 30s
       timeout: 15s
