@@ -85,7 +85,7 @@ Smoke test chat completion (adjust `model` to match what vLLM loaded):
 curl -sS http://127.0.0.1:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "nvidia/Nemotron-3-Super-120B-A12B-FP8",
+    "model": "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-FP8",
     "messages": [{"role":"user","content":"Say hi in one sentence."}],
     "max_tokens": 32,
     "temperature": 0.2

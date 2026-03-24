@@ -21,11 +21,13 @@ services:
       HUGGING_FACE_HUB_TOKEN: ${HF_TOKEN:-}
     command:
       - --model
-      - ${LOCAL_LLM_MODEL:-nvidia/Nemotron-3-Super-120B-A12B-FP8}
+      - ${LOCAL_LLM_MODEL:-nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-FP8}
       - --tensor-parallel-size
       - "2"
       - --max-model-len
       - "16384"
+      # Nemotron (and similar) ship custom HF config; required alongside HF_TOKEN for gated repos
+      - --trust-remote-code
     networks:
       - saas_internal_network
     healthcheck:
@@ -50,7 +52,7 @@ services:
       - "127.0.0.1:3000:3000"
     environment:
       LOCAL_LLM_URL: http://vllm-backend:8000/v1
-      LOCAL_LLM_MODEL: ${LOCAL_LLM_MODEL:-nvidia/Nemotron-3-Super-120B-A12B-FP8}
+      LOCAL_LLM_MODEL: ${LOCAL_LLM_MODEL:-nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-FP8}
       LOCAL_LLM_API_KEY: local-no-key-required
     depends_on:
       vllm-backend:

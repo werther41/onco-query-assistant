@@ -12,6 +12,6 @@ export function getLocalLlmProvider() {
 export function getLocalLlmModelId(): string {
   return (
     process.env.LOCAL_LLM_MODEL ??
-    "nvidia/Nemotron-3-Super-120B-A12B-FP8"
+    "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-FP8"
   );
 }
