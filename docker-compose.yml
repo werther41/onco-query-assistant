@@ -1,0 +1,85 @@
+services:
+  vllm-backend:
+    image: vllm/vllm-openai:v0.8.5
+    container_name: enterprise-llm-node
+    restart: unless-stopped
+    ipc: host
+    shm_size: "16gb"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 2
+              capabilities: [gpu]
+    volumes:
+      - hf_cache:/root/.cache/huggingface
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      HUGGING_FACE_HUB_TOKEN: ${HF_TOKEN:-}
+    command:
+      - --model
+      - ${LOCAL_LLM_MODEL:-nvidia/Nemotron-3-Super-120B-A12B-FP8}
+      - --tensor-parallel-size
+      - "2"
+      - --max-model-len
+      - "16384"
+    networks:
+      - saas_internal_network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS http://127.0.0.1:8000/v1/models >/dev/null || exit 1",
+        ]
+      interval: 30s
+      timeout: 15s
+      retries: 30
+      start_period: 900s
+
+  nextjs-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: saas-web-app
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      LOCAL_LLM_URL: http://vllm-backend:8000/v1
+      LOCAL_LLM_MODEL: ${LOCAL_LLM_MODEL:-nvidia/Nemotron-3-Super-120B-A12B-FP8}
+      LOCAL_LLM_API_KEY: local-no-key-required
+    depends_on:
+      vllm-backend:
+        condition: service_healthy
+    networks:
+      - saas_internal_network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: saas-cloudflared
+    restart: unless-stopped
+    network_mode: host
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    profiles:
+      - tunnel
+
+networks:
+  saas_internal_network:
+    driver: bridge
+
+volumes:
+  hf_cache:

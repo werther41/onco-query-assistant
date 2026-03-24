@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { chatWithGemini } from "@/lib/gemini/report-generator";
+import { chatWithReportContext } from "@/lib/llm/report-generator";
 import { VariantInfo } from "@/lib/civic/types";
 
 export async function POST(request: NextRequest) {
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
 
     const history = conversationHistory || [];
-    const response = await chatWithGemini(
+    const response = await chatWithReportContext(
       history,
       question,
       {

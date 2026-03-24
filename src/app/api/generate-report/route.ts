@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateReport } from "@/lib/gemini/report-generator";
+import { generateReport } from "@/lib/llm/report-generator";
 import { VariantInfo } from "@/lib/civic/types";
 
 export async function POST(request: NextRequest) {

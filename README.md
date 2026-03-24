@@ -1,6 +1,6 @@
 # OncoQuery Assistant
 
-AI-powered genomic variant interpretation tool for oncologists, researchers, and students. Rapidly interpret genomic variants by querying the CIViC database and generating comprehensive clinical reports using Google Gemini AI.
+AI-powered genomic variant interpretation tool for oncologists, researchers, and students. Rapidly interpret genomic variants by querying the CIViC database and generating comprehensive clinical reports using a **local OpenAI-compatible LLM** (for example [vLLM](https://github.com/vllm-project/vllm) on bare metal).
 
 🌐 **Live Demo**: [https://onco-query-assistant.vercel.app/](https://onco-query-assistant.vercel.app/)
 
@@ -19,7 +19,7 @@ AI-powered genomic variant interpretation tool for oncologists, researchers, and
 
 - **Frontend**: Next.js 14+ with App Router, TypeScript, Tailwind CSS
 - **Backend**: Next.js API Routes
-- **AI**: Google Gemini 1.5 Pro (reports) and Flash (chat)
+- **AI**: Vercel AI SDK (`@ai-sdk/openai`) targeting an OpenAI-compatible endpoint (local vLLM)
 - **Data Source**: CIViC Database (GraphQL API)
 
 ## Getting Started
@@ -27,7 +27,7 @@ AI-powered genomic variant interpretation tool for oncologists, researchers, and
 ### Prerequisites
 
 - Node.js 18+ and npm
-- Google Gemini API key (from GCP)
+- A running OpenAI-compatible API (for local development, vLLM at `http://localhost:8000/v1` or set `LOCAL_LLM_URL`)
 
 ### Installation
 
@@ -42,12 +42,21 @@ cd onco-query-assistant
 npm install
 ```
 
-3. Create `.env.local` file in the root directory:
-```env
-GOOGLE_GEMINI_API_KEY=your_gemini_api_key_here
-CIVIC_GRAPHQL_URL=https://civicdb.org/api/graphql
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+3. Create `.env.local` from the example and adjust:
+```bash
+cp .env.example .env.local
 ```
+
+Key variables:
+
+- `LOCAL_LLM_URL` — Base URL for the OpenAI-compatible API (must include `/v1`, e.g. `http://localhost:8000/v1`)
+- `LOCAL_LLM_MODEL` — Model id served by vLLM (must match `--model` on the server)
+- `LOCAL_LLM_API_KEY` — Placeholder string if the server does not require a key
+
+Optional:
+
+- `CIVIC_GRAPHQL_URL` — Defaults to `https://civicdb.org/api/graphql` if unset
+- `NEXT_PUBLIC_APP_URL` — App URL for client-side links
 
 4. Run the development server:
 ```bash
@@ -56,18 +65,35 @@ npm run dev
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## Docker (full stack on GPU host)
+
+See [docs/deploy-runbook.md](docs/deploy-runbook.md) for SSH deployment and validation commands.
+
+```bash
+cp .env.example .env
+# Set HF_TOKEN if required; set LOCAL_LLM_MODEL to match vLLM
+
+docker compose up -d --build
+```
+
+Optional Cloudflare Tunnel (requires `CLOUDFLARE_TUNNEL_TOKEN` in `.env`):
+
+```bash
+docker compose --profile tunnel up -d
+```
+
 ## Usage
 
-1. **Enter Variant Information**: 
+1. **Enter Variant Information**:
    - Enter a gene name (required)
    - Optionally enter variant information (e.g., T790M, G12S, or p.Arg361Cys)
    - The system automatically normalizes HGVS format to CIViC format
 
-2. **Generate Report**: 
+2. **Generate Report**:
    - Click "Generate Report"
    - The system queries CIViC and generates an AI-powered clinical report
 
-3. **Ask Questions**: 
+3. **Ask Questions**:
    - After viewing the report, use the chat interface to ask follow-up questions
    - Examples: "What is a kinase inhibitor?", "Explain evidence level A"
 
@@ -90,8 +116,9 @@ oncoQuery/
 │   ├── components/       # React components
 │   ├── lib/              # Core logic
 │   │   ├── civic/        # CIViC integration
-│   │   └── gemini/       # Gemini AI integration
+│   │   └── llm/          # Local OpenAI-compatible LLM (vLLM)
 │   └── types/            # TypeScript types
+├── docs/                 # Deployment runbooks
 └── content-source-reference/  # Reference documentation
 ```
 
