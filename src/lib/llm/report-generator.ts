@@ -1,6 +1,7 @@
 import { generateText } from "ai";
 import { getLocalLlmModelId, getLocalLlmProvider } from "./client";
 import { buildReportPrompt, buildChatPrompt } from "./prompts";
+import { stripThinkingPrefix } from "./strip-thinking";
 import { VariantInfo } from "@/lib/civic/types";
 
 const LLM_ATTEMPTS = 4;
@@ -33,7 +34,7 @@ async function generateLlmText(
         maxRetries: 0,
         timeout: options.timeoutMs,
       });
-      return text;
+      return stripThinkingPrefix(text);
     } catch (e) {
       lastError = e;
       if (attempt < LLM_ATTEMPTS - 1) {

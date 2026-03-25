@@ -61,7 +61,7 @@ If **`dependency failed to start: ... vllm-backend ... is unhealthy`** (or `ente
    ```
    If `docker compose run` does not accept `--gpus`, use:
    ```bash
-   docker run --rm --gpus all vllm/vllm-openai:v0.8.5 nvidia-smi
+   docker run --rm --gpus all vllm/vllm-openai:v0.17.1 nvidia-smi
    ```
 3. Large models can take many minutes before `/v1/models` responds; `start_period` in Compose allows that. If the process **exits** (OOM, CUDA error, HF auth), the service will never become healthy—use the logs from step 1.
 
@@ -93,6 +93,8 @@ curl -sS http://127.0.0.1:8000/v1/chat/completions \
 ```
 
 Expect HTTP 200 and a `choices[0].message.content` (or equivalent) in the JSON.
+
+Nemotron 3: Compose passes `--reasoning-parser nemotron_v3` so vLLM can return **`reasoning_content`** separately from **`content`** (see [vLLM Nemotron 3 Super](https://vllm.ai/blog/nemotron-3-super)). The Next.js app also strips inline thinking when it still appears inside `content` (see `src/lib/llm/strip-thinking.ts`).
 
 ## 4. Validate Next.js on the host
 

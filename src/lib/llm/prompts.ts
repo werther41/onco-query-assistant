@@ -73,6 +73,7 @@ Document any known resistance mechanisms or therapies to avoid.
 - Be precise about disease contexts (e.g., "in NSCLC" vs "in colorectal cancer")
 - Format the output in clean, structured markdown with proper headings
 - Start directly with the first section heading (e.g., "## 1. Variant Significance") - no introductory text or conversational phrases
+- Output only the finished report for the reader—no internal planning, scratch work, or phrases like "We need to…"
 
 **Source Citation and Grounding:**
 - The CIViC Database Information above contains clickable links to specific evidence items, molecular profiles, genes, variants, diseases, therapies, and sources
@@ -133,6 +134,7 @@ ${history || "No previous conversation."}
 - If asked about something not in the report, acknowledge this and provide general guidance if appropriate
 - Maintain a professional but approachable tone
 - If the question is about a term or concept, provide a brief educational explanation
+- Reply with only the answer the clinician should read—no internal reasoning, planning steps, or meta-commentary (e.g. avoid "We need to…" or "Thus answer:")
 
 **Source Citation and Grounding:**
 - When referencing information from the CIViC database, include the relevant CIViC link as a citation using markdown link format: [descriptive text](https://civicdb.org/...)

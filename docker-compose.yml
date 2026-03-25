@@ -1,6 +1,7 @@
 services:
   vllm-backend:
-    image: vllm/vllm-openai:v0.8.5
+    # v0.17+ recommended for NVIDIA FP8 Nemotron-class models (older tags may mis-detect FP8)
+    image: vllm/vllm-openai:v0.17.1
     container_name: enterprise-llm-node
     restart: unless-stopped
     ipc: host
@@ -28,6 +29,9 @@ services:
       - "16384"
       # Nemotron (and similar) ship custom HF config; required alongside HF_TOKEN for gated repos
       - --trust-remote-code
+      # Splits thinking vs final answer in OpenAI API (reasoning_content vs content)
+      - --reasoning-parser
+      - nemotron_v3
     networks:
       - saas_internal_network
     healthcheck:
