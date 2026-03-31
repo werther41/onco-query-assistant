@@ -76,14 +76,27 @@ services:
       retries: 5
       start_period: 60s
 
-  cloudflared:
+  # cloudflared:
+  #   image: cloudflare/cloudflared:latest
+  #   container_name: saas-cloudflared
+  #   restart: unless-stopped
+  #   network_mode: host
+  #   command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+  #   profiles:
+  #     - tunnel
+
+  cloudflared-quick:
     image: cloudflare/cloudflared:latest
-    container_name: saas-cloudflared
+    container_name: saas-cloudflared-quick
     restart: unless-stopped
     network_mode: host
-    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
-    profiles:
+    command:
       - tunnel
+      - --no-autoupdate
+      - --url
+      - http://127.0.0.1:3000
+    depends_on:
+      - nextjs-frontend
 
 networks:
   saas_internal_network:
