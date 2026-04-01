@@ -98,7 +98,7 @@ export default function ChatInterface({ reportContext }: ChatInterfaceProps) {
       </div>
 
       {/* Message list */}
-      <div className="h-80 overflow-y-auto p-3 space-y-2 bg-surface-alt">
+      <div className="h-[480px] overflow-y-auto p-4 space-y-4 bg-surface-alt">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
             <p className="text-sm text-muted-foreground">
@@ -111,37 +111,62 @@ export default function ChatInterface({ reportContext }: ChatInterfaceProps) {
           </div>
         ) : (
           messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex ${
-                message.role === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
-              <div
-                className={`max-w-[90%] rounded-lg px-3 py-2 text-sm ${
-                  message.role === "user"
-                    ? "bg-primary text-white"
-                    : "bg-white border border-[rgba(0,0,0,0.07)] text-foreground shadow-card"
-                }`}
-              >
-                <ReactMarkdown
-                  components={{
-                    p: ({ children }) => (
-                      <p className="text-sm leading-relaxed">{children}</p>
-                    ),
-                  }}
-                >
-                  {message.content}
-                </ReactMarkdown>
-              </div>
+            <div key={index}>
+              {message.role === "user" ? (
+                <div className="flex justify-end">
+                  <div className="max-w-[85%] rounded-lg px-3 py-2 text-sm bg-primary text-white">
+                    {message.content}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-sm text-foreground">
+                  <ReactMarkdown
+                    components={{
+                      p: ({ children }) => (
+                        <p className="text-sm leading-relaxed mb-2 last:mb-0">{children}</p>
+                      ),
+                      h1: ({ children }) => (
+                        <h1 className="text-base font-semibold mb-2 mt-3 first:mt-0">{children}</h1>
+                      ),
+                      h2: ({ children }) => (
+                        <h2 className="text-sm font-semibold mb-1.5 mt-3 first:mt-0">{children}</h2>
+                      ),
+                      h3: ({ children }) => (
+                        <h3 className="text-sm font-semibold mb-1 mt-2 first:mt-0">{children}</h3>
+                      ),
+                      ul: ({ children }) => (
+                        <ul className="list-disc list-inside space-y-0.5 mb-2 pl-1">{children}</ul>
+                      ),
+                      ol: ({ children }) => (
+                        <ol className="list-decimal list-inside space-y-0.5 mb-2 pl-1">{children}</ol>
+                      ),
+                      li: ({ children }) => (
+                        <li className="text-sm leading-relaxed">{children}</li>
+                      ),
+                      strong: ({ children }) => (
+                        <strong className="font-semibold">{children}</strong>
+                      ),
+                      em: ({ children }) => (
+                        <em className="italic">{children}</em>
+                      ),
+                      code: ({ children }) => (
+                        <code className="bg-[rgba(0,0,0,0.06)] px-1 py-0.5 rounded text-xs font-mono">{children}</code>
+                      ),
+                      blockquote: ({ children }) => (
+                        <blockquote className="border-l-2 border-primary/30 pl-3 my-2 text-muted-foreground">{children}</blockquote>
+                      ),
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
+                </div>
+              )}
             </div>
           ))
         )}
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-white border border-[rgba(0,0,0,0.07)] rounded-lg px-3 py-2 shadow-card">
-              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-            </div>
+            <Loader2 className="w-4 h-4 animate-spin text-muted-foreground mt-1" />
           </div>
         )}
         <div ref={messagesEndRef} />

@@ -173,8 +173,8 @@ export default function ReportPage() {
 
       {/* Main content */}
       <div className="px-8 py-6">
-        <div className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+        <div className="grid lg:grid-cols-2 gap-6">
+          <div>
             <ReportDisplay
               report={reportData.report}
               generating={generating}
