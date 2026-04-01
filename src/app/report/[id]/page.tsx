@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { WorkflowStepper, type StepStatus } from "@/components/ui/workflow-stepper";
 import ReportDisplay from "@/components/ReportDisplay";
 import ChatInterface from "@/components/ChatInterface";
 import { ChevronLeft, Loader2, Share2, Download } from "lucide-react";
@@ -26,41 +27,41 @@ export default function ReportPage() {
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
 
-  const generateReport = useCallback(async (data: ReportData, reportId: string) => {
-    try {
-      const response = await fetch("/api/generate-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          civicMarkdown: data.civicMarkdown,
-          variantInfo: data.variantInfo,
-        }),
-      });
+  const generateReport = useCallback(
+    async (data: ReportData, reportId: string) => {
+      setGenerating(true);
+      try {
+        const response = await fetch("/api/generate-report", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            civicMarkdown: data.civicMarkdown,
+            variantInfo: data.variantInfo,
+          }),
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to generate report");
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to generate report");
+        }
+
+        const { report } = await response.json();
+        const updatedData = { ...data, report };
+        setReportData(updatedData);
+        sessionStorage.setItem(`report-${reportId}`, JSON.stringify(updatedData));
+      } catch (err: unknown) {
+        console.error("Error generating report:", err);
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to generate report";
+        setError(errorMessage);
+      } finally {
+        setGenerating(false);
       }
-
-      const { report } = await response.json();
-      
-      // Update report data
-      const updatedData = {
-        ...data,
-        report,
-      };
-      
-      setReportData(updatedData);
-      
-      // Update sessionStorage
-      sessionStorage.setItem(`report-${reportId}`, JSON.stringify(updatedData));
-    } catch (err: unknown) {
-      console.error("Error generating report:", err);
-      const errorMessage = err instanceof Error ? err.message : "Failed to generate report";
-      setError(errorMessage);
-    }
-  }, []);
+    },
+    []
+  );
 
   useEffect(() => {
     const reportId = params.id as string;
@@ -70,14 +71,11 @@ export default function ReportPage() {
       return;
     }
 
-    // Retrieve report data from sessionStorage
     const stored = sessionStorage.getItem(`report-${reportId}`);
     if (stored) {
       try {
         const data = JSON.parse(stored);
         setReportData(data);
-        
-        // If report doesn't exist, generate it
         if (!data.report && data.civicMarkdown && data.variantInfo) {
           generateReport(data, reportId);
         }
@@ -90,12 +88,21 @@ export default function ReportPage() {
     setLoading(false);
   }, [params.id, generateReport]);
 
+  // Derive stepper state
+  const civicDone = !!(reportData?.civicMarkdown);
+  const reportDone = !!(reportData?.report);
+  const stepStatuses: StepStatus[] = [
+    civicDone ? "completed" : loading ? "in-progress" : "pending",
+    civicDone && !reportDone ? "in-progress" : reportDone ? "completed" : "pending",
+    reportDone ? "completed" : "pending",
+  ];
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading report...</p>
+          <Loader2 className="w-7 h-7 animate-spin text-primary mx-auto mb-3" />
+          <p className="text-sm text-muted-foreground">Loading report...</p>
         </div>
       </div>
     );
@@ -103,9 +110,9 @@ export default function ReportPage() {
 
   if (error || !reportData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-4">
-          <div className="bg-destructive/10 border border-destructive/20 text-destructive px-6 py-4 rounded-lg mb-4">
+          <div className="bg-destructive/8 border border-destructive/20 text-destructive text-sm px-5 py-4 rounded-lg mb-4">
             {error || "Report not found"}
           </div>
           <Link href="/">
@@ -120,48 +127,61 @@ export default function ReportPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-background to-secondary py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Top Navigation */}
-        <div className="flex items-center justify-between mb-8">
+    <main className="min-h-screen bg-background">
+      {/* Page header */}
+      <div className="flex items-center justify-between px-8 pt-8 pb-0">
+        <div className="flex items-center gap-4">
           <Link href="/">
-            <Button variant="ghost" className="gap-2 text-muted-foreground">
+            <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground">
               <ChevronLeft className="w-4 h-4" />
-              Back to Home
+              Back
             </Button>
           </Link>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2 bg-transparent"
-            >
-              <Share2 className="w-4 h-4" />
-              <span className="hidden sm:inline">Share</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2 bg-transparent"
-            >
-              <Download className="w-4 h-4" />
-              <span className="hidden sm:inline">Export</span>
-            </Button>
+          <div>
+            <h1 className="text-[18px] font-semibold text-foreground">
+              {reportData.variantInfo.gene}
+              {reportData.variantInfo.variant && (
+                <span className="text-muted-foreground font-normal ml-1.5">
+                  {reportData.variantInfo.variant}
+                </span>
+              )}
+            </h1>
+            <p className="meta-label mt-0.5">Variant Interpretation Report</p>
           </div>
         </div>
 
-        {/* Main Content and Sidebar */}
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Report Content */}
-          <div className="lg:col-span-2 space-y-6">
+        <div className="flex items-center gap-3">
+          {/* Workflow stepper */}
+          <WorkflowStepper
+            steps={[
+              { label: "CIViC Query", status: stepStatuses[0] },
+              { label: "AI Analysis", status: stepStatuses[1] },
+              { label: "Report Ready", status: stepStatuses[2] },
+            ]}
+          />
+          <div className="w-px h-5 bg-[rgba(0,0,0,0.10)]" />
+          <Button variant="outline" size="sm" className="gap-1.5">
+            <Share2 className="w-4 h-4" />
+            <span className="hidden sm:inline">Share</span>
+          </Button>
+          <Button variant="outline" size="sm" className="gap-1.5">
+            <Download className="w-4 h-4" />
+            <span className="hidden sm:inline">Export</span>
+          </Button>
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div className="px-8 py-6">
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
             <ReportDisplay
               report={reportData.report}
+              generating={generating}
               variantInfo={reportData.variantInfo}
               civicMarkdown={reportData.civicMarkdown}
             />
           </div>
-
-          {/* Sidebar - Chat Interface */}
           <div>
             {reportData && (
               <ChatInterface

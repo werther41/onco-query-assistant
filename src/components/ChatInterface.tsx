@@ -66,138 +66,132 @@ export default function ChatInterface({ reportContext }: ChatInterfaceProps) {
       }
 
       const { response: assistantResponse } = await response.json();
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: assistantResponse,
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: assistantResponse },
+      ]);
     } catch (error: unknown) {
-      const errorMessageText = error instanceof Error 
-        ? error.message 
-        : "Failed to get response. Please try again.";
-      const errorMessage: Message = {
-        role: "assistant",
-        content: `Error: ${errorMessageText}`,
-      };
-      setMessages((prev) => [...prev, errorMessage]);
+      const text =
+        error instanceof Error
+          ? error.message
+          : "Failed to get response. Please try again.";
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: `Error: ${text}` },
+      ]);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Card className="p-6 shadow-md border-0 sticky top-8 gap-2">
-      <div className="flex items-center gap-1">
-        <MessageCircle className="w-5 h-5 text-primary" />
-        <h3 className="text-lg font-bold text-foreground">Ask Questions</h3>
+    <Card className="p-0 sticky top-6 overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-[rgba(0,0,0,0.07)]">
+        <MessageCircle className="w-4 h-4 text-primary shrink-0" />
+        <div>
+          <p className="text-sm font-semibold text-foreground leading-none">
+            Ask Questions
+          </p>
+          <p className="meta-label mt-0.5">Follow-up about this variant</p>
+        </div>
       </div>
-      <p className="text-sm text-muted-foreground">
-        Ask follow-up questions about the variant, evidence, treatment options,
-        or request clarification.
-      </p>
 
-      <div className="border border-border rounded-lg h-96 flex flex-col mb-1">
-        <div className="flex-1 overflow-y-auto p-2 space-y-2">
-          {messages.length === 0 ? (
-            <div className="text-center text-muted-foreground mt-8">
-              <p>Start a conversation by asking a question below.</p>
-              <p className="text-sm mt-2">
-                Example: &quot;What is a kinase inhibitor?&quot; or &quot;Explain the evidence
-                level A.&quot;
-              </p>
-            </div>
-          ) : (
-            messages.map((message, index) => (
+      {/* Message list */}
+      <div className="h-80 overflow-y-auto p-3 space-y-2 bg-surface-alt">
+        {messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-center px-4">
+            <p className="text-sm text-muted-foreground">
+              Ask a follow-up question about the variant, evidence, or treatment
+              options.
+            </p>
+            <p className="meta-label mt-2">
+              e.g. &quot;What is a kinase inhibitor?&quot;
+            </p>
+          </div>
+        ) : (
+          messages.map((message, index) => (
+            <div
+              key={index}
+              className={`flex ${
+                message.role === "user" ? "justify-end" : "justify-start"
+              }`}
+            >
               <div
-                key={index}
-                className={`flex ${
-                  message.role === "user" ? "justify-end" : "justify-start"
+                className={`max-w-[90%] rounded-lg px-3 py-2 text-sm ${
+                  message.role === "user"
+                    ? "bg-primary text-white"
+                    : "bg-white border border-[rgba(0,0,0,0.07)] text-foreground shadow-card"
                 }`}
               >
-                <div
-                  className={`max-w-[96%] rounded-lg p-3 ${
-                    message.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-secondary text-foreground"
-                  }`}
+                <ReactMarkdown
+                  components={{
+                    p: ({ children }) => (
+                      <p className="text-sm leading-relaxed">{children}</p>
+                    ),
+                  }}
                 >
-                  <p className="whitespace-pre-wrap text-sm">
-                    <ReactMarkdown
-                      components={{
-                        p: ({ children }) => (
-                          <p className="text-sm">{children}</p>
-                        ),
-                      }}
-                    >
-                      {message.content}
-                    </ReactMarkdown>
-                  </p>
-                </div>
-              </div>
-            ))
-          )}
-          {loading && (
-            <div className="flex justify-start">
-              <div className="bg-secondary rounded-lg px-4 py-2">
-                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                  {message.content}
+                </ReactMarkdown>
               </div>
             </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-
-        <form onSubmit={handleSubmit} className="border-t border-border p-4">
-          <div className="flex gap-2">
-            <Input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask a question about the variant..."
-              disabled={loading}
-              className="flex-1"
-            />
-            <Button
-              type="submit"
-              disabled={loading || !input.trim()}
-              size="icon"
-            >
-              {loading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Send className="w-4 h-4" />
-              )}
-            </Button>
+          ))
+        )}
+        {loading && (
+          <div className="flex justify-start">
+            <div className="bg-white border border-[rgba(0,0,0,0.07)] rounded-lg px-3 py-2 shadow-card">
+              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+            </div>
           </div>
-        </form>
+        )}
+        <div ref={messagesEndRef} />
       </div>
 
-      {/* Additional Info Section */}
-      <div className="pt-3 border-border">
-        <h4 className="text-sm font-semibold text-foreground mb-3">
-          Additional Resources
-        </h4>
-        <ul className="space-y-2 text-sm">
-          <li>
-            <a
-              href="https://civicdb.org"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
-              CIViC Entry
-            </a>
-          </li>
-          <li>
-            <a href="#" className="text-primary hover:underline">
-              Related Literature
-            </a>
-          </li>
-          <li>
-            <a href="#" className="text-primary hover:underline">
-              Trial Information
-            </a>
-          </li>
-        </ul>
+      {/* Input */}
+      <form
+        onSubmit={handleSubmit}
+        className="flex gap-2 px-3 py-3 border-t border-[rgba(0,0,0,0.07)] bg-white"
+      >
+        <Input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask about this variant..."
+          disabled={loading}
+          className="flex-1"
+        />
+        <Button
+          type="submit"
+          disabled={loading || !input.trim()}
+          size="icon-sm"
+        >
+          {loading ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <Send className="w-3.5 h-3.5" />
+          )}
+        </Button>
+      </form>
+
+      {/* Resources */}
+      <div className="px-4 py-3 border-t border-[rgba(0,0,0,0.07)]">
+        <p className="meta-label mb-2">Additional Resources</p>
+        <div className="flex flex-col gap-1">
+          <a
+            href="https://civicdb.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-primary hover:underline"
+          >
+            CIViC Database Entry
+          </a>
+          <a href="#" className="text-xs text-primary hover:underline">
+            Related Literature
+          </a>
+          <a href="#" className="text-xs text-primary hover:underline">
+            Clinical Trial Information
+          </a>
+        </div>
       </div>
     </Card>
   );

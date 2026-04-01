@@ -5,11 +5,13 @@ import remarkGfm from "remark-gfm";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DataPulse } from "@/components/ui/data-pulse";
 import { ExternalLink } from "lucide-react";
 import type { Components } from "react-markdown";
 
 interface ReportDisplayProps {
   report: string | null;
+  generating?: boolean;
   variantInfo: {
     gene: string;
     variant?: string;
@@ -19,39 +21,39 @@ interface ReportDisplayProps {
 
 const markdownComponents: Partial<Components> = {
   h1: ({ children }) => (
-    <h1 className="text-3xl font-semibold text-foreground mt-6 mb-4 first:mt-0">
+    <h1 className="text-2xl font-semibold text-foreground mt-6 mb-3 first:mt-0">
       {children}
     </h1>
   ),
   h2: ({ children }) => (
-    <h2 className="text-2xl font-semibold text-foreground mt-6 mb-3 first:mt-0">
+    <h2 className="text-lg font-semibold text-foreground mt-5 mb-2 first:mt-0">
       {children}
     </h2>
   ),
   h3: ({ children }) => (
-    <h3 className="text-xl font-semibold text-foreground mt-4 mb-2">
+    <h3 className="text-base font-semibold text-foreground mt-4 mb-1.5">
       {children}
     </h3>
   ),
   h4: ({ children }) => (
-    <h4 className="text-lg font-semibold text-foreground mt-3 mb-2">
+    <h4 className="text-sm font-semibold text-foreground mt-3 mb-1">
       {children}
     </h4>
   ),
   p: ({ children }) => (
-    <p className="text-muted-foreground mb-1 leading-relaxed">{children}</p>
+    <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{children}</p>
   ),
   ul: ({ children }) => (
-    <ul className="list-disc text-muted-foreground mb-4 space-y-2 ml-4">
+    <ul className="list-disc text-sm text-muted-foreground mb-4 space-y-1.5 ml-4">
       {children}
     </ul>
   ),
   ol: ({ children }) => (
-    <ol className="list-decimal list-inside text-muted-foreground mb-4 space-y-2 ml-4">
+    <ol className="list-decimal list-inside text-sm text-muted-foreground mb-4 space-y-1.5 ml-4">
       {children}
     </ol>
   ),
-  li: ({ children }) => <li className="text-muted-foreground">{children}</li>,
+  li: ({ children }) => <li className="text-sm text-muted-foreground">{children}</li>,
   strong: ({ children }) => (
     <strong className="font-semibold text-foreground">{children}</strong>
   ),
@@ -59,7 +61,7 @@ const markdownComponents: Partial<Components> = {
     <em className="italic text-muted-foreground">{children}</em>
   ),
   code: ({ children }) => (
-    <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono text-foreground">
+    <code className="bg-surface-alt px-1.5 py-0.5 rounded text-xs font-mono text-foreground">
       {children}
     </code>
   ),
@@ -75,63 +77,66 @@ const markdownComponents: Partial<Components> = {
     </a>
   ),
   table: ({ children }) => (
-    <div className="overflow-x-auto my-6">
-      <table className="min-w-full border-collapse border border-border">
-        {children}
-      </table>
+    <div className="overflow-x-auto my-5">
+      <table className="min-w-full border-collapse">{children}</table>
     </div>
   ),
-  thead: ({ children }) => <thead className="bg-muted">{children}</thead>,
-  tbody: ({ children }) => (
-    <tbody className="divide-y divide-border">{children}</tbody>
+  thead: ({ children }) => (
+    <thead className="bg-surface-alt">{children}</thead>
   ),
-  tr: ({ children }) => <tr className="hover:bg-muted/50">{children}</tr>,
+  tbody: ({ children }) => (
+    <tbody className="divide-y divide-[rgba(0,0,0,0.05)]">{children}</tbody>
+  ),
+  tr: ({ children }) => (
+    <tr className="hover:bg-surface-alt transition-colors">{children}</tr>
+  ),
   th: ({ children }) => (
-    <th className="border border-border px-4 py-2 text-left font-semibold text-foreground bg-muted">
+    <th className="px-4 py-2.5 text-left text-xs font-semibold text-foreground uppercase tracking-wide">
       {children}
     </th>
   ),
   td: ({ children }) => (
-    <td className="border border-border px-4 py-2 text-muted-foreground">
-      {children}
-    </td>
+    <td className="px-4 py-2.5 text-sm text-muted-foreground">{children}</td>
   ),
 };
 
 export default function ReportDisplay({
   report,
+  generating,
   variantInfo,
   civicMarkdown,
 }: ReportDisplayProps) {
   return (
-    <Card className="p-8 shadow-md border-0">
-      <div className="mb-6 pb-4 border-b border-border">
-        <h2 className="text-3xl font-semibold text-foreground mb-2">
-          Variant Interpretation Report
-        </h2>
-        <p className="text-muted-foreground text-lg">
-          <span className="font-semibold text-foreground">Gene:</span>{" "}
-          {variantInfo.gene}
+    <Card className="p-6">
+      {/* Header */}
+      <div className="mb-5 pb-4 border-b border-[rgba(0,0,0,0.07)]">
+        <div className="flex items-center gap-3">
+          <h2 className="text-base font-semibold text-foreground">
+            Interpretation Report
+          </h2>
+          {generating && <DataPulse label="Generating" />}
+        </div>
+        <div className="flex items-center gap-4 mt-2">
+          <div>
+            <span className="meta-value-bold">{variantInfo.gene}</span>
+            <span className="meta-label ml-2">Gene</span>
+          </div>
           {variantInfo.variant && (
-            <>
-              {" "}
-              <span className="text-muted-foreground mx-2">|</span>
-              <span className="font-semibold text-foreground">
-                Variant:
-              </span>{" "}
-              {variantInfo.variant}
-            </>
+            <div>
+              <span className="meta-value-bold">{variantInfo.variant}</span>
+              <span className="meta-label ml-2">Variant</span>
+            </div>
           )}
-        </p>
+        </div>
       </div>
 
       <Tabs defaultValue="report" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6">
+        <TabsList>
           <TabsTrigger value="report">Report</TabsTrigger>
-          <TabsTrigger value="source">Source</TabsTrigger>
+          <TabsTrigger value="source">CIViC Source</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="report" className="markdown-content">
+        <TabsContent value="report">
           {report ? (
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
@@ -140,23 +145,22 @@ export default function ReportDisplay({
               {report}
             </ReactMarkdown>
           ) : (
-            <div className="space-y-4">
-              <Skeleton className="h-8 w-1/3" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-5/6" />
-              <Skeleton className="h-8 w-1/3 mt-6" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-4/5" />
-              <Skeleton className="h-8 w-1/3 mt-6" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-5/6" />
+            <div className="space-y-3 pt-2">
+              <Skeleton className="h-5 w-1/3" />
+              <Skeleton className="h-3.5 w-full" />
+              <Skeleton className="h-3.5 w-full" />
+              <Skeleton className="h-3.5 w-5/6" />
+              <Skeleton className="h-5 w-1/3 mt-5" />
+              <Skeleton className="h-3.5 w-full" />
+              <Skeleton className="h-3.5 w-4/5" />
+              <Skeleton className="h-5 w-1/3 mt-5" />
+              <Skeleton className="h-3.5 w-full" />
+              <Skeleton className="h-3.5 w-3/4" />
             </div>
           )}
         </TabsContent>
 
-        <TabsContent value="source" className="markdown-content">
+        <TabsContent value="source">
           {civicMarkdown ? (
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
@@ -165,9 +169,9 @@ export default function ReportDisplay({
               {civicMarkdown}
             </ReactMarkdown>
           ) : (
-            <div className="text-muted-foreground">
+            <p className="text-sm text-muted-foreground pt-2">
               No source data available.
-            </div>
+            </p>
           )}
         </TabsContent>
       </Tabs>

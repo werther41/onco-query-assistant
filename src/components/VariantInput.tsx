@@ -37,12 +37,10 @@ export default function VariantInput({ variants, onChange }: VariantInputProps) 
       {variants.map((variant, index) => (
         <div
           key={index}
-          className="border border-border rounded-lg p-4 bg-card"
+          className="border border-[rgba(0,0,0,0.08)] rounded-lg p-4 bg-white"
         >
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-sm font-semibold text-foreground">
-              Variant {index + 1}
-            </h3>
+            <p className="meta-label">Variant {index + 1}</p>
             {variants.length > 1 && (
               <button
                 type="button"
@@ -58,7 +56,7 @@ export default function VariantInput({ variants, onChange }: VariantInputProps) 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
             {/* Gene Name */}
             <div className="space-y-1">
-              <Label htmlFor={`gene-${index}`} className="font-medium text-xs">
+              <Label htmlFor={`gene-${index}`} className="meta-label">
                 Gene Name <span className="text-destructive">*</span>
               </Label>
               <Input
@@ -73,7 +71,7 @@ export default function VariantInput({ variants, onChange }: VariantInputProps) 
 
             {/* Variant */}
             <div className="space-y-1">
-              <Label htmlFor={`variant-${index}`} className="text-xs font-medium">
+              <Label htmlFor={`variant-${index}`} className="meta-label">
                 Variant <span className="text-destructive">*</span>
               </Label>
               <Input
@@ -89,7 +87,7 @@ export default function VariantInput({ variants, onChange }: VariantInputProps) 
             <div className="space-y-1">
               <Label
                 htmlFor={`exon-${index}`}
-                className="text-xs font-medium text-muted-foreground"
+                className="meta-label"
               >
                 Exon
               </Label>
@@ -109,7 +107,7 @@ export default function VariantInput({ variants, onChange }: VariantInputProps) 
             <div className="space-y-1">
               <Label
                 htmlFor={`nucleotide-${index}`}
-                className="text-xs font-medium text-muted-foreground"
+                className="meta-label"
               >
                 Nucleotide Change
               </Label>
@@ -126,7 +124,7 @@ export default function VariantInput({ variants, onChange }: VariantInputProps) 
             <div className="space-y-1">
               <Label
                 htmlFor={`amino-${index}`}
-                className="text-xs font-medium text-muted-foreground"
+                className="meta-label"
               >
                 Amino Acid Change
               </Label>
@@ -144,7 +142,7 @@ export default function VariantInput({ variants, onChange }: VariantInputProps) 
       <button
         type="button"
         onClick={addVariant}
-        className="flex items-center gap-2 text-primary hover:text-primary/80 font-medium text-sm transition-colors"
+        className="flex items-center gap-1.5 text-primary hover:text-primary-hover font-medium text-sm transition-colors"
       >
         <span className="text-lg">+</span> Add Another Variant
       </button>
