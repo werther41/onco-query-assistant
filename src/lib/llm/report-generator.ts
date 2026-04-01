@@ -47,6 +47,7 @@ async function generateLlmText(
 
 /**
  * Generates a clinical report using the local OpenAI-compatible (vLLM) endpoint.
+ * Requires vLLM `--max-model-len` large enough for the CIViC prompt plus max completion (see docker-compose).
  */
 export async function generateReport(
   civicMarkdown: string,

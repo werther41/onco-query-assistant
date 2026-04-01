@@ -20,13 +20,17 @@ services:
       - "127.0.0.1:8000:8000"
     environment:
       HUGGING_FACE_HUB_TOKEN: ${HF_TOKEN:-}
+      # Required only if --max-model-len is very large (e.g. 1M); see Nemotron HF model card.
+      # VLLM_ALLOW_LONG_MAX_MODEL_LEN: "1"
     command:
       - --model
       - ${LOCAL_LLM_MODEL:-nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-FP8}
       - --tensor-parallel-size
       - "2"
+      # Nemotron supports much longer context; 16k was too small for prompt + 8192 completion.
+      # Raise/lower for your GPUs (longer context = more KV memory). Override: VLLM_MAX_MODEL_LEN in .env
       - --max-model-len
-      - "16384"
+      - ${VLLM_MAX_MODEL_LEN:-65536}
       # Nemotron (and similar) ship custom HF config; required alongside HF_TOKEN for gated repos
       - --trust-remote-code
       # Splits thinking vs final answer in OpenAI API (reasoning_content vs content)
